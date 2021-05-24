@@ -1,0 +1,31 @@
+.enter-done {
+    opacity: 1!important;
+    pointer-events: visible!important;
+}
+
+.modal.exit {
+    opacity: 0;
+}
+
+.enter-done .modal-content {
+    transform: translateY(0);
+}
+
+.modal.exit .modal-content {
+    transform: translateY(-200px);
+}
+
+.modal-header,
+.modal-footer {
+    padding: 10px;
+}
+
+.modal-title {
+    margin: 0;
+}
+
+.modal-body {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
