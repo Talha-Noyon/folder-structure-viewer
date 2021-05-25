@@ -1,10 +1,11 @@
 const route = require('express').Router();
 const mongoose = require('mongoose');
 const Folder = mongoose.model('Folder');
+const path = require('path');
 
 route.get('/', async (req, res) => {
   try {
-    const folders = await Folder.aggregate([
+    /*const folders = await Folder.aggregate([
       {
         $match : { "_parentFolder" : null }
       },
@@ -16,7 +17,26 @@ route.get('/', async (req, res) => {
           "as": "childs"
         }
       }
-    ]);
+    ]);*/
+    const folders = await Folder.find({"_parentFolder": null})
+      .populate({
+        path: 'childs',
+        // select: 'name',
+        model: 'Folder',
+        populate: {
+          path: 'childs',
+          model: 'Folder',
+          //select: '-createdOn -name',
+          populate: [{
+            path: 'childs',
+            model: 'Folder',
+          }, {
+            path: 'childs',
+            model: 'Folder',
+            //options: { sort: { 'name': 1 } }
+          }]
+        }
+      });
     return res.status(200).json({folders});
   } catch (err) {
     console.log(err);
@@ -51,7 +71,7 @@ route.post('/', async (req, res) => {
     
     let parentFolder = null;
     if (parentId != null) {
-      parentFolder = await Folder.findOne({_id: parentId});
+      parentFolder = await Folder.findOneAndUpdate({_id: parentId}, {$set: {isActive: true}}, {new: true});
       if (parentFolder == null) {
         return res.status(401).json({error: true, message: 'error creating new folder'});
       }
@@ -74,8 +94,7 @@ route.post('/', async (req, res) => {
 route.put('/', async (req, res) => {
   try {
     const currId = req.body.id;
-    const updatedName = req.body.updatedName;
-    
+    const {updatedName, isActive} = req.body;
     if (currId && updatedName) {
       const currFolder = await Folder.findOneAndUpdate({_id: currId}, {name: updatedName})
       if (currFolder) {
@@ -83,12 +102,20 @@ route.put('/', async (req, res) => {
       }
       return res.status(404).json({error: true, message: 'no folder found'})
     }
+    if (currId && req.body.hasOwnProperty('isActive')) {
+      const currFolder = await Folder.findOneAndUpdate({_id: currId}, {isActive});
+      if (currFolder) {
+        return res.status(200).json({error: false, message: 'Successfully Updated'});
+      }
+      return res.status(404).json({error: true, message: 'no folder found'})
+    }
     
-    return res.status(404).json({error: true, message: 'required parameters missing'})
+    return res.status(404).json({error: true, message: 'required parameters missing'});
+    
   } catch (err) {
     return res.status(404).json({error: true, message: 'Error updating folder name'})
   }
-})
+});
 
 route.delete('/', async (req, res) => {
   try {

@@ -20,6 +20,10 @@ function getMarginString(axis, value) {
     return `margin-top: ${spacers[value] / spacer}rem !important;`
   } else if (axis === 'b') {
     return `margin-bottom: ${spacers[value] / spacer}rem !important;`
+  } else if (axis === 'l') {
+    return `margin-left: ${spacers[value] / spacer}rem !important;`
+  } else if (axis === 'r') {
+    return `margin-right: ${spacers[value] / spacer}rem !important;`
   };
 }
 const Margin = styled.div`

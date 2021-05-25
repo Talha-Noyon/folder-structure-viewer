@@ -37,7 +37,7 @@ const Modal = (props) => {
             <Button onClick={props.onClose}>
               Cancel
             </Button>
-            <Button onClick={props.onClose}>
+            <Button onClick={props.onSubmit}>
               Create
             </Button>
           </div>
