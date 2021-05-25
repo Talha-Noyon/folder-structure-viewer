@@ -10,5 +10,5 @@ route.get("/", (req, res) => {
   }
 });
 route.use('/folder',require('./api/Folder'));
- 
+
 module.exports = route;
