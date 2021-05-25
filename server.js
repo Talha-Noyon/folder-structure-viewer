@@ -18,6 +18,14 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, './client/build')));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
+
+app.get("/dashboard", (req, res) => {
+  if (req.url.indexOf('/dashboard') > -1) {
+    res.redirect('/');
+  } else {
+    res.sendFile(path.join(__dirname, "./client/build/index.html"));
+  }
+});
 app.use('/api',require('./routes'));
 const PORT = process.env.PORT || 80;
 app.listen(PORT,()=>{
