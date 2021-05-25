@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 require('./models/Folder');
 // creates root folder
-require('./models/init');
+require('./models/Init');
 
 ['connecting', 'connected', 'open', 'disconnecting', 'disconnected', 'close', 'reconnected', 'error', 'fullsetup', 'timeout'].forEach(name => {
     mongoose.connection.on(name, err => {
