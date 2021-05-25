@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const path = require('path');
 require('./models/Folder');
 // creates root folder
 require('./models/init');
@@ -14,6 +15,7 @@ mongoose.connect("mongodb+srv://HeadlessTechnologies:HeadlessTechnologies@headle
 
 const app = express();
 app.use(cors());
+app.use(express.static(path.join(__dirname, './client/build')));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.json({ limit: '50mb' }));
 app.use('/api',require('./routes'));
