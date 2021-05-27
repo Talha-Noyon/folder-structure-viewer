@@ -48,7 +48,8 @@ export default function Dashboard() {
   const onActiveFolder = (id, isActive) => {
     axios.put('/folder', {id, isActive})
       .then(response => {
-        const updatedFolders = folders.map(folder => {
+        const {folder} = response.data;
+        /*const updatedFolders = folders.map(folder => {
           if (folder._id === id) {
             folder.isActive = isActive;
           } else if (folder.childs.length > 0) {
@@ -59,8 +60,9 @@ export default function Dashboard() {
             });
           }
           return folder;
-        });
-        setFolders(updatedFolders);
+        });*/
+        console.log(folder);
+        // setFolders(updatedFolders);
         getFolders();
       })
   };
@@ -83,40 +85,43 @@ export default function Dashboard() {
         })
     }
   };
-  const FolderItem = (props) => {
-    return (
-      <Row style={{"marginLeft": props.left}}>
-        <Col sm={6}>
-          <Link to={`#`}>
-            <DFlex style={{alignItems: "center"}}>
-              <Margin axis={`x`} value={1}>
-                <DFlex style={{alignItems: "center"}} onClick={() => {
-                  onActiveFolder(props.id, !props.isActive)
-                }}>
-                  <i className={clsx("fa", {
-                    "fa-caret-down": true === props.isActive,
-                    "fa-caret-right": false === props.isActive
-                  })}/>
-                  <Margin axis={`x`} value={1}><span>{props.name}</span></Margin>
-                </DFlex>
-              </Margin>
-              <Margin axis={`x`} value={1}>
-                <DFlex>
-                  <Margin axis={`l`} value={2}/>
-                  {props.childs && (
-                    <i onClick={() => {
-                      onDeleteFolder(props.id)
-                    }} className="fa fa-trash-alt"/>
-                  )}
-                </DFlex>
-              </Margin>
-            </DFlex>
-          </Link>
-        </Col>
-        {props.folderCreate && (
+  const FolderItem = ({folders, left = 0}) => {
+    if (!folders || !folders.length) {
+      return null
+    }
+    return folders.map(folder => (
+      <Fragment key={folder._id}>
+        <Row style={{"marginLeft": left + 1}}>
+          <Col sm={6}>
+            <Link to={`#`}>
+              <DFlex style={{alignItems: "center"}}>
+                <Margin axis={`x`} value={1}>
+                  <DFlex style={{alignItems: "center"}} onClick={() => {
+                    onActiveFolder(folder._id, !folder.isActive)
+                  }}>
+                    <i className={clsx("fa", {
+                      "fa-caret-down": true === folder.isActive,
+                      "fa-caret-right": false === folder.isActive
+                    })}/>
+                    <Margin axis={`x`} value={1}><span>{folder.name}</span></Margin>
+                  </DFlex>
+                </Margin>
+                {folder && folder._parentFolder && (
+                  <Margin axis={`x`} value={1}>
+                    <DFlex>
+                      <Margin axis={`l`} value={2}/>
+                      <i onClick={() => {
+                        onDeleteFolder(folder._id)
+                      }} className="fa fa-trash-alt"/>
+                    </DFlex>
+                  </Margin>
+                )}
+              </DFlex>
+            </Link>
+          </Col>
           <Col sm={6}>
             <Link to={`#`} onClick={() => {
-              onCreateFolder(props.id, props.name)
+              onCreateFolder(folder._id, folder.name)
             }}>
               <DFlex style={{alignItems: "center"}}>
                 <Margin axis={`x`} value={1}><i className="fa fa-plus"/></Margin>
@@ -124,11 +129,14 @@ export default function Dashboard() {
                   <span>New</span>
                 </Margin>
               </DFlex>
-            </Link>
+             </Link>
           </Col>
+        </Row>
+        {folder && folder.isActive && (
+          <FolderItem folders={folder.childs} left={left+14}/>
         )}
-      </Row>
-    )
+      </Fragment>
+    ))
   };
   const onSubmit = () => {
     console.log("onSubmit");
@@ -192,35 +200,7 @@ export default function Dashboard() {
                   <h5>Folder Structure Viewer</h5>
                 </Col>
               </Row>
-              {(folders && folders.length > 0 && folders.map((item, key) => {
-                return (
-                  <Fragment key={key}>
-                    <FolderItem id={item._id} name={item.name} isActive={item?.isActive} left={"0rem"} childs={item._parentFolder} folderCreate={true}/>
-                    {(item.childs && item.childs.length > 0 && item.isActive && item.childs.map((cItem, key) => {
-                      return (
-                        <Fragment key={key} >
-                        <FolderItem id={cItem._id} name={cItem.name} isActive={cItem.isActive}
-                                    left={"0.6rem"} childs={cItem._parentFolder} folderCreate={true}/>
-                          {(cItem.childs && cItem.childs.length > 0 && cItem.isActive && cItem.childs.map((gcItem, key) => {
-                            return (
-                              <Fragment key={key}>
-                                <FolderItem id={gcItem._id} name={gcItem.name} isActive={gcItem?.isActive}
-                                            left={"1.1rem"} childs={gcItem._parentFolder} folderCreate={true}/>
-                                {(gcItem.childs && gcItem.childs.length > 0 && gcItem.isActive && gcItem.childs.map((ggcItem, key) => {
-                                  return (
-                                    <FolderItem key={key} id={ggcItem._id} name={ggcItem.name} isActive={ggcItem?.isActive}
-                                                left={"1.7rem"} childs={ggcItem._parentFolder} folderCreate={false}/>
-                                  )
-                                }))}
-                              </Fragment>
-                            )
-                          }))}
-                        </Fragment>
-                      )
-                    }))}
-                  </Fragment>
-                )
-              }))}
+              <FolderItem folders={folders} />
             </CardBody>
           </Card>
         </Margin>

@@ -18,25 +18,36 @@ route.get('/', async (req, res) => {
         }
       }
     ]);*/
-    const folders = await Folder.find({"_parentFolder": null})
-      .populate({
+    async function findFolderWithChilds(folders) {
+      for (let folder of folders) {
+        let childs = await Folder.find({_parentFolder: folder._id});
+        folder._doc.childs = childs;
+        if (childs && childs.length > 0) {
+          await findFolderWithChilds(childs);
+        }
+      }
+      return folders;
+    };
+    let folders = await Folder.find({"_parentFolder": null});
+    folders = await findFolderWithChilds(folders);
+    /*.populate({
+      path: 'childs',
+      // select: 'name',
+      model: 'Folder',
+      populate: {
         path: 'childs',
-        // select: 'name',
         model: 'Folder',
-        populate: {
+        //select: '-createdOn -name',
+        populate: [{
           path: 'childs',
           model: 'Folder',
-          //select: '-createdOn -name',
-          populate: [{
-            path: 'childs',
-            model: 'Folder',
-          }, {
-            path: 'childs',
-            model: 'Folder',
-            //options: { sort: { 'name': 1 } }
-          }]
-        }
-      });
+        }, {
+          path: 'childs',
+          model: 'Folder',
+          //options: { sort: { 'name': 1 } }
+        }]
+      }
+    });*/
     return res.status(200).json({folders});
   } catch (err) {
     console.log(err);
@@ -81,7 +92,7 @@ route.post('/', async (req, res) => {
       name: folderName,
       createdOn: now,
       _parentFolder: parentFolder
-    })
+    });
     
     const createdFolder = await newFolder.save();
     return res.status(200).json(createdFolder);
